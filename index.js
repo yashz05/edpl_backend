@@ -16,6 +16,13 @@ var dispatch = require("./routes/dispatch_ordersRoutes");
 var photos = require("./routes/photosRoutes");
 var photos_directory = require("./routes/photos_directoriesRoutes");
 var approval_menu = require("./routes/approval_menuRoutes");
+var customer_historyRoutes = require("./routes/customer_historyRoutes");
+var customer_history_euroRoutes = require("./routes/customer_history_euroRoutes");
+var customer_grade = require("./routes/customer_gradeRoutes");
+var customer_type = require("./routes/customer_typeRoutes");
+var laminate_data = require("./routes/laminate_dataRoutes");
+var sample_requests = require("./routes/sample_request_companyRoutes");
+var collection_requests = require("./routes/daily_collectionRoutes");
 app.use(cors());
 app.use(express.json());
 connect(process.env.MONOGODB_URL, {
@@ -59,30 +66,29 @@ app.use(function (err, req, res, next) {
     });
   }
 });
-app.use('/assets', express.static('public'))
-app.use( "/api/edpl/*",async function (req, res, next) {
-
-    var token = req.auth.uuid;
-    if (token == null) {
-      res.status(401).json({
-        message: "invalid token!",
-      });
-    }
-    var getuser = await sales_teamModel.findOne({
-      uuid: token,
+app.use("/assets", express.static("public"));
+app.use("/api/edpl/*", async function (req, res, next) {
+  var token = req.auth.uuid;
+  if (token == null) {
+    res.status(401).json({
+      message: "invalid token!",
     });
-    if (getuser != null && getuser.active === true) {
-      next();
-    } else {
-      res.status(401).json({
-        message: "sales person inactive",
-      });
-    }
-  
+  }
+  var getuser = await sales_teamModel.findOne({
+    uuid: token,
+  });
+  if (getuser != null && getuser.active === true) {
+    next();
+  } else {
+    res.status(401).json({
+      message: "sales person inactive",
+    });
+  }
 });
 
 app.get("/", async (req, res) => {
-  await cache.cachecheck("home", { message: "ok" }, req, res, "r");
+  // await cache.cachecheck("home", { message: "ok" }, req, res, "r");
+  res.json({ message: "ok" });
 });
 
 app.use("/api/health", health);
@@ -93,6 +99,13 @@ app.use("/api/edpl/dispatch", dispatch);
 app.use("/api/edpl/photos", photos);
 app.use("/api/edpl/photos_directory", photos_directory);
 app.use("/api/edpl/aproval_menu", approval_menu);
+app.use("/api/edpl/customer_history", customer_historyRoutes);
+app.use("/api/edpl/customer_history_euro", customer_history_euroRoutes);
+app.use("/api/edpl/customer_grade", customer_grade);
+app.use("/api/edpl/customer_type", customer_type);
+app.use("/api/edpl/laminate", laminate_data);
+app.use("/api/edpl/sample_requests", sample_requests);
+app.use("/api/edpl/collection_data", collection_requests);
 
 app.listen(8092, () => {
   console.log("APP STARTED " + jwt_secret);

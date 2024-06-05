@@ -6,6 +6,7 @@ const photosSchema = new Schema({
 	'sub_dir' : String,
 	'file_name' : String,
 	'name':String
-});
+},
+{ timestamps: true });
 
 module.exports = mongoose.model('photos', photosSchema);

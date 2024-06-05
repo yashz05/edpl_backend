@@ -7,6 +7,7 @@ const sales_teamSchema = new Schema({
 	'active' : Boolean,
 	'uuid' : String,
 	'password' : String
-});
+},
+{ timestamps: true });
 
 module.exports = mongoose.model('sales_team', sales_teamSchema);

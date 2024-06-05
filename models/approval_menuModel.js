@@ -11,6 +11,7 @@ const approval_menuSchema = new Schema({
 	'rates' : String,
 	'approved_by' : String,
 	'contractor' : String
-});
+},
+{ timestamps: true });
 
 module.exports = mongoose.model('approval_menu ', approval_menuSchema);

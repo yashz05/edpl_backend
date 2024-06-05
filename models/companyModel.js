@@ -3,7 +3,7 @@ const Schema   = mongoose.Schema;
 
 const companySchema = new Schema({
 	'name' : String,
-	'address' : Array,
+	'address' : Object,
 	'sid' : String,
 	'area_of_company' : String,
 	'person_to_contact' : Array,
@@ -20,6 +20,7 @@ const companySchema = new Schema({
 	'sample_catalouge_data' : Array,
 	'first_visited' : Date,
 	'next_visit' : Date
-});
+},
+{ timestamps: true });
 
 module.exports = mongoose.model('company', companySchema);

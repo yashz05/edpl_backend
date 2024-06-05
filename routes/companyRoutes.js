@@ -6,6 +6,8 @@ const companyController = require('../controllers/companyController.js');
  * GET
  */
 router.get('/', companyController.list);
+router.get('/byid', companyController.getbyid);
+
 
 /*
  * GET
