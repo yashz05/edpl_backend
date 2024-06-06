@@ -23,6 +23,7 @@ var customer_type = require("./routes/customer_typeRoutes");
 var laminate_data = require("./routes/laminate_dataRoutes");
 var sample_requests = require("./routes/sample_request_companyRoutes");
 var collection_requests = require("./routes/daily_collectionRoutes");
+var daily_visit = require("./routes/daily_visitRoutes");
 app.use(cors());
 app.use(express.json());
 connect(process.env.MONOGODB_URL, {
@@ -106,6 +107,7 @@ app.use("/api/edpl/customer_type", customer_type);
 app.use("/api/edpl/laminate", laminate_data);
 app.use("/api/edpl/sample_requests", sample_requests);
 app.use("/api/edpl/collection_data", collection_requests);
+app.use("/api/edpl/daily_visit", daily_visit);
 
 app.listen(8092, () => {
   console.log("APP STARTED " + jwt_secret);

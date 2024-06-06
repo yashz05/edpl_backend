@@ -5,6 +5,8 @@ const daily_collectionSchema = new Schema({
 	'customer_name' : String,
 	'amount' : String,
 	'spid' : String
+},{
+	timestamps : true
 });
 
 module.exports = mongoose.model('daily_collection', daily_collectionSchema);

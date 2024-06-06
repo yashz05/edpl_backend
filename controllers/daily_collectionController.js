@@ -11,7 +11,9 @@ module.exports = {
      * daily_collectionController.list()
      */
     list: async function (req, res) {
-        const all = await Daily_collectionModel.find({})
+        const all = await Daily_collectionModel.find({
+            "spid" : req.auth.uuid
+        })
 
         return res.json(all);
 
@@ -39,7 +41,7 @@ module.exports = {
         const daily_collection = new Daily_collectionModel({
 			customer_name : req.body.customer_name,
 			amount : req.body.amount,
-			spid : req.body.spid});
+			spid : req.auth.uuid});
             try {
                 await Daily_collectionModel.create(daily_collection);
         return res.status(201).json(daily_collection)
