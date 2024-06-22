@@ -11,7 +11,7 @@ router.get('/', daily_visitController.list);
  * GET
  */
 router.get('/:id', daily_visitController.show);
-
+router.get('/overview/:id', daily_visitController.summ);
 /*
  * POST
  */

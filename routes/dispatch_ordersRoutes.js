@@ -12,11 +12,12 @@ router.get('/', dispatch_ordersController.list);
  */
 router.get('/:id', dispatch_ordersController.show);
 
+
 /*
  * POST
  */
 router.post('/', dispatch_ordersController.create);
-
+router.get("/overview/:id", dispatch_ordersController.summ);
 /*
  * PUT
  */

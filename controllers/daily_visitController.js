@@ -1,5 +1,5 @@
 const Daily_visitModel = require("../models/daily_visitModel.js");
-
+const salesperson = require("../models/sales_teamModel.js");
 /**
  * daily_visitController.js
  *
@@ -10,28 +10,95 @@ module.exports = {
    * daily_visitController.list()
    */
   list: async function (req, res) {
+    const spid = req.auth.uuid; // Assuming spid identifies the user
+    // Get today's date range
+    var users_type = [];
+    var u = await salesperson.findOne({
+      uuid: spid,
+    });
+    var all = [];
+
+    const todayStart = new Date().setHours(0, 0, 0, 0);
+    const todayEnd = new Date().setHours(23, 59, 59, 999);
+
     try {
-      // Get the start and end of the current day
-      const startOfDay = new Date();
-      startOfDay.setHours(0, 0, 0, 0);
-  
-      const endOfDay = new Date();
-      endOfDay.setHours(23, 59, 59, 999);
-  
-      // Fetch records where the spid matches and the createdAt is within today
-      const all = await Daily_visitModel.find({
-        spid: req.auth.uuid,
-        createdAt: {
-          $gte: startOfDay,
-          $lte: endOfDay,
-        },
-      });
-  
-      return res.json(all);
+      if (u.access.includes("admin")) {
+        const sales_orders = await Daily_visitModel.find({
+          createdAt: {
+            $gte: todayStart, // Greater than or equal to today's start
+            $lt: todayEnd, // Less than today's end
+          },
+        }).exec();
+        if (sales_orders.length > 0) {
+          return res.json(sales_orders);
+        } else {
+          return res.json({
+            message: "No Daily Collection orders found for today for admin.",
+          });
+        }
+      } else {
+        const sales_orders = await Daily_visitModel.find({
+          spid: req.auth.uuid, // Filter by user's spid
+          createdAt: {
+            $gte: todayStart, // Greater than or equal to today's start
+            $lt: todayEnd, // Less than today's end
+          },
+        }).exec();
+
+        if (sales_orders.length > 0) {
+          return res.json(sales_orders);
+        } else {
+          return res.json({
+            message: "No  Daily Collection  orders found for today.",
+          });
+        }
+      }
     } catch (error) {
-      return res.status(500).json({ error: 'An error occurred while fetching records.' });
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
     }
-},
+  },
+
+  summ: async function (req, res) {
+    const spid = req.auth.uuid; // Assuming spid identifies the user
+    // Get today's date range
+    var users_type = [];
+    var u = await salesperson.findOne({
+      uuid: spid,
+    });
+    var all = [];
+
+    try {
+      if (u.access.includes("admin")) {
+        const sales_orders = await Daily_visitModel.find({
+          company_name: req.params.id,
+        }).exec();
+        if (sales_orders.length > 0) {
+          return res.json(sales_orders);
+        } else {
+          return res.json({
+            message: "No Daily Collection orders found for today for admin.",
+          });
+        }
+      } else {
+        const sales_orders = await Daily_visitModel.find({
+          spid: req.auth.uuid, // Filter by user's spid
+          company_name: req.params.id,
+        }).exec();
+
+        if (sales_orders.length > 0) {
+          return res.json(sales_orders);
+        } else {
+          return res.json({
+            message: "No  Daily Collection  orders found for today.",
+          });
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  },
 
   /**
    * daily_visitController.show()

@@ -5,12 +5,12 @@ const sales_teamController = require("../controllers/sales_teamController.js");
 /*
  * GET
  */
-// router.get('/', sales_teamController.list);
+router.get('/', sales_teamController.list);
 
 /*
  * GET
  */
-// router.get('/:id', sales_teamController.show);
+router.get('/:id', sales_teamController.show);
 
 /*
  * POST

@@ -20,9 +20,28 @@ module.exports = {
    */
   show: async function (req, res) {
     const id = req.params.id;
+    console.log(id);
     const sample_request_company = await Sample_request_companyModel.find({
       company_name: id,
     }).exec();
+    console.log(sample_request_company);
+    if (sample_request_company != null) {
+      return res.json(sample_request_company);
+    } else {
+      return res.json({ message: "not found !" });
+    }
+  },
+
+  /**
+   * sample_request_companyController.show()
+   */
+  single: async function (req, res) {
+    const id = req.params.id;
+    console.log(id);
+    const sample_request_company = await Sample_request_companyModel.findOne({
+      _id: id,
+    }).exec();
+    console.log(sample_request_company);
     if (sample_request_company != null) {
       return res.json(sample_request_company);
     } else {

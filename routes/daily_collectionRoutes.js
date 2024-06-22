@@ -1,30 +1,31 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const daily_collectionController = require('../controllers/daily_collectionController.js');
+const daily_collectionController = require("../controllers/daily_collectionController.js");
 
 /*
  * GET
  */
-router.get('/', daily_collectionController.list);
+router.get("/", daily_collectionController.list);
 
 /*
  * GET
  */
-router.get('/:id', daily_collectionController.show);
+router.get("/:id", daily_collectionController.show);
+router.get("/overview/:id", daily_collectionController.summ);
 
 /*
  * POST
  */
-router.post('/', daily_collectionController.create);
+router.post("/", daily_collectionController.create);
 
 /*
  * PUT
  */
-router.put('/:id', daily_collectionController.update);
+router.put("/:id", daily_collectionController.update);
 
 /*
  * DELETE
  */
-router.delete('/:id', daily_collectionController.remove);
+router.delete("/:id", daily_collectionController.remove);
 
 module.exports = router;

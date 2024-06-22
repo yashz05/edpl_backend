@@ -1,5 +1,5 @@
 const Approval_menuModel = require('../models/approval_menuModel.js');
-
+const salesperson = require("../models/sales_teamModel.js");
 /**
  * approval_menu Controller.js
  *
@@ -11,6 +11,7 @@ module.exports = {
      * approval_menu Controller.list()
      */
     list: async function (req, res) {
+        
         const all = await Approval_menuModel.find({})
 
         return res.json(all);

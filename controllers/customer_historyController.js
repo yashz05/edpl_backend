@@ -37,8 +37,9 @@ module.exports = {
      */
     create: async function (req, res) {
         const customer_history = new Customer_historyModel({
-			title : req.body.title,
-			active : req.body.active});
+          title: req.body.title,
+          active: req.body.active,
+        });
             try {
                 await Customer_historyModel.create(customer_history);
         return res.status(201).json(customer_history)

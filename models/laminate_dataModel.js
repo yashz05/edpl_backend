@@ -4,16 +4,12 @@ const Schema = mongoose.Schema;
 const laminate_dataSchema = new Schema(
   {
     SrNo: String,
-    ItemType: String,
-    ItemName: String,
-    ItemShortName: String,
-    ItemGroupName: String,
-    ItemCatName: String,
-    ThicknessName: String,
-    BrandName: String,
-    ItemHeadingNo: String,
+    ItemName: { type: String, unique: true }, // Ensure ItemName is unique
+    Category: String,
   },
-  { timestamps: true ,collection: 'laminate_data' }
+  {
+    timestamps: true,
+  }
 );
 
 module.exports = mongoose.model("laminate_data", laminate_dataSchema);

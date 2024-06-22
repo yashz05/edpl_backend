@@ -4,7 +4,7 @@ var cors = require("cors");
 var app = express();
 var { connect } = require("mongoose");
 var { expressjwt: jwt } = require("express-jwt");
-var cache = require("./others/redis");
+// var cache = require("./others/redis");
 
 const jwt_secret = "cYvPcHRFzRHGLwflceKdSYJIbPmDdJ";
 var health = require("./health/health");
@@ -21,9 +21,12 @@ var customer_history_euroRoutes = require("./routes/customer_history_euroRoutes"
 var customer_grade = require("./routes/customer_gradeRoutes");
 var customer_type = require("./routes/customer_typeRoutes");
 var laminate_data = require("./routes/laminate_dataRoutes");
+var veneer_data = require("./routes/veneer_dataRoutes");
 var sample_requests = require("./routes/sample_request_companyRoutes");
 var collection_requests = require("./routes/daily_collectionRoutes");
 var daily_visit = require("./routes/daily_visitRoutes");
+var catalogue = require("./routes/catalogueRoutes");
+var admins = require("./routes/adminsRoutes");
 app.use(cors());
 app.use(express.json());
 connect(process.env.MONOGODB_URL, {
@@ -34,27 +37,47 @@ connect(process.env.MONOGODB_URL, {
   .then(() => console.log("Connected to DB"))
   .catch((error) => console.error(error.message));
 // CORS
-var allowedOrigins = ["https://hoppscotch.io", "http://example2.com"];
+// var allowedOrigins = [
+//   "https://hoppscotch.io",
+//   "http://example2.com",
+//   "http://localhost:3000",
+// ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin
-      // (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) {
-        var msg =
-          "The CORS policy for this site does not " +
-          "allow access from the specified Origin.";
-        return callback(new Error(msg), false);
-      }
-      return callback(null, true);
-    },
-  })
-);
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       // allow requests with no origin
+//       // (like mobile apps or curl requests)
+//       if (!origin) return callback(null, true);
+//       if (allowedOrigins.indexOf(origin) === -1) {
+//         var msg =
+//           "The CORS policy for this site does not " +
+//           "allow access from the specified Origin.";
+//         return callback(new Error(msg), false);
+//       }
+//       return callback(null, true);
+//     },
+//   })
+// );
 
 // CORS END
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, Content-Length, X-Requested-With"
+  );
 
+  //intercepts OPTIONS method
+  if ("OPTIONS" === req.method) {
+    //respond with 200
+    res.send(200);
+  } else {
+    //move on
+    next();
+  }
+});
 app.use(
   "/api/edpl/*",
   jwt({ secret: process.env.JWT_SECRET, algorithms: ["HS256"] })
@@ -93,21 +116,24 @@ app.get("/", async (req, res) => {
 });
 
 app.use("/api/health", health);
-app.use("/api/auth/sales_team", sales_team);
+app.use("/api/auth/sales_team", sales_team); //dashboard done
 app.use("/api/edpl/company", company);
 app.use("/api/edpl/sales", sales);
 app.use("/api/edpl/dispatch", dispatch);
 app.use("/api/edpl/photos", photos);
 app.use("/api/edpl/photos_directory", photos_directory);
-app.use("/api/edpl/aproval_menu", approval_menu);
-app.use("/api/edpl/customer_history", customer_historyRoutes);
-app.use("/api/edpl/customer_history_euro", customer_history_euroRoutes);
-app.use("/api/edpl/customer_grade", customer_grade);
-app.use("/api/edpl/customer_type", customer_type);
-app.use("/api/edpl/laminate", laminate_data);
+app.use("/api/edpl/aproval_menu", approval_menu); //dashboard done
+app.use("/api/edpl/customer_history", customer_historyRoutes); //dashboard done
+app.use("/api/edpl/customer_history_euro", customer_history_euroRoutes); //dashboard done
+app.use("/api/edpl/customer_grade", customer_grade); //dashboard done
+app.use("/api/edpl/customer_type", customer_type); //dashboard done
+app.use("/api/edpl/laminate", laminate_data); //dashboard done
+app.use("/api/edpl/veneer", veneer_data); //dashboard done
 app.use("/api/edpl/sample_requests", sample_requests);
 app.use("/api/edpl/collection_data", collection_requests);
 app.use("/api/edpl/daily_visit", daily_visit);
+app.use("/api/edpl/catalogue", catalogue); //dashboard done
+// app.use("/api/edpl/admins", admins);r
 
 app.listen(8092, () => {
   console.log("APP STARTED " + jwt_secret);

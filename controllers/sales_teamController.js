@@ -1,8 +1,8 @@
 const Sales_teamModel = require("../models/sales_teamModel.js");
 const { cryptPassword, comparePassword } = require("./../others/password.js");
-const jwt = require('jsonwebtoken');
-const dotenv = require("dotenv")
-dotenv.config()
+const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
+dotenv.config();
 
 /**
  * sales_teamController.js
@@ -18,7 +18,6 @@ module.exports = {
 
     return res.json(all);
   },
-  
 
   /**
    * sales_teamController.show()
@@ -44,17 +43,19 @@ module.exports = {
         check.password
       );
       if (myBoolean == true) {
-            var data = {
-                "uuid" : check.uuid,
-                "id" : check._id,
-               
-            }
-            var token = jwt.sign(data,  process.env.JWT_SECRET,{
-                expiresIn : '1y'
-            })
+        var data = {
+          uuid: check.uuid,
+          id: check._id,
+          access: check.access,
+        };
+        var token = jwt.sign(data, process.env.JWT_SECRET, {
+          expiresIn: "1y",
+        });
 
         return res.status(200).json({
-          message: token
+          message: token,
+          access: check.access,
+          uuid: check.uuid,
         });
       } else {
         return res.status(401).json({
@@ -84,10 +85,11 @@ module.exports = {
       active: true,
       uuid: Math.floor(Math.random() * 99999),
       password: myEncryptPassword,
+      access: req.body.access,
     });
     try {
       if (check.length > 0) {
-        return res.status(401).json({
+        return res.status(400).json({
           message: " User already exists with this email",
         });
       } else {
@@ -106,20 +108,32 @@ module.exports = {
     const id = req.params.id;
     const sales_team = await Sales_teamModel.findOne({ _id: id }).exec();
     if (sales_team != null) {
-      // update
+      // Update fields
       sales_team.name = req.body.name ? req.body.name : sales_team.name;
       sales_team.email = req.body.email ? req.body.email : sales_team.email;
       sales_team.active = req.body.active ? req.body.active : sales_team.active;
       sales_team.uuid = req.body.uuid ? req.body.uuid : sales_team.uuid;
-      sales_team.password = req.body.password
-        ? req.body.password
-        : sales_team.password;
+      sales_team.access = req.body.access ? req.body.access : sales_team.access;
+      if (req.body.password != sales_team.password) {
+        if (req.body.password != "" || req.body.password != null) {
+          sales_team.password = await cryptPassword(req.body.password);
+        } else {
+          sales_team.password = sales_team.password;
+        }
+      }
+      // if (req.body.password != "" || req.body.password != null) {
+      //   sales_team.password = await cryptPassword(req.body.password);
+      // } else {
+      //   sales_team.password = sales_team.password;
+      // }
 
       await Sales_teamModel.updateOne({ _id: id }, sales_team).exec();
       return res.json(sales_team);
     } else {
-      // create
-      return res.status(400).json({ message: "Error" });
+      // Create error response
+      return res
+        .status(400)
+        .json({ message: "Error: Sales team member not found" });
     }
   },
 
