@@ -36,6 +36,7 @@ connect(process.env.MONOGODB_URL, {
 })
   .then(() => console.log("Connected to DB"))
   .catch((error) => console.error(error.message));
+  
 // CORS
 // var allowedOrigins = [
 //   "https://hoppscotch.io",
@@ -60,6 +61,7 @@ connect(process.env.MONOGODB_URL, {
 //   })
 // );
 
+ 
 // CORS END
 // app.use(function (req, res, next) {
 //   res.header("Access-Control-Allow-Origin", "*");
@@ -78,6 +80,7 @@ connect(process.env.MONOGODB_URL, {
 //     next();
 //   }
 // });
+
 app.use(
   "/api/edpl/*",
   jwt({ secret: process.env.JWT_SECRET, algorithms: ["HS256"] })
