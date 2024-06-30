@@ -28,7 +28,7 @@ router.get("/:id", photosController.show);
 /*
  * POST
  */
-router.post("/", upload.single("file"), photosController.create);
+router.post("/", upload.array("file",30), photosController.create);
 
 /*
  * PUT

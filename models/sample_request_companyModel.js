@@ -6,6 +6,7 @@ const sample_request_companySchema = new Schema(
     company_name: String,
     type: String,
     data: Object,
+    sentsample: { type: Boolean, default: false },
     spid: String,
   },
   { timestamps: true }

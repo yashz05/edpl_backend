@@ -61,23 +61,23 @@ connect(process.env.MONOGODB_URL, {
 // );
 
 // CORS END
-app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, Content-Length, X-Requested-With"
-  );
+// app.use(function (req, res, next) {
+//   res.header("Access-Control-Allow-Origin", "*");
+//   res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Content-Type, Authorization, Content-Length, X-Requested-With"
+//   );
 
-  //intercepts OPTIONS method
-  if ("OPTIONS" === req.method) {
-    //respond with 200
-    res.send(200);
-  } else {
-    //move on
-    next();
-  }
-});
+//   //intercepts OPTIONS method
+//   if ("OPTIONS" === req.method) {
+//     //respond with 200
+//     res.send(200);
+//   } else {
+//     //move on
+//     next();
+//   }
+// });
 app.use(
   "/api/edpl/*",
   jwt({ secret: process.env.JWT_SECRET, algorithms: ["HS256"] })

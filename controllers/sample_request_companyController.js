@@ -58,6 +58,7 @@ module.exports = {
       type: req.body.type,
       data: req.body.data,
       spid: req.body.spid,
+      sentsample: req.body.sentsample,
     });
     try {
       await Sample_request_companyModel.create(sample_request_company);
@@ -80,6 +81,12 @@ module.exports = {
       sample_request_company.company_name = req.body.company_name
         ? req.body.company_name
         : sample_request_company.company_name;
+      sample_request_company.sentsample =
+        req.body.sentsample !== undefined
+          ? req.body.sentsample
+          : sample_request_company.sentsample;
+          console.log(req.body.sentsample);
+
       sample_request_company.type = req.body.type
         ? req.body.type
         : sample_request_company.type;
@@ -89,6 +96,30 @@ module.exports = {
       sample_request_company.spid = req.body.spid
         ? req.body.spid
         : sample_request_company.spid;
+
+      await Sample_request_companyModel.updateOne(
+        { _id: id },
+        sample_request_company
+      ).exec();
+      return res.json(sample_request_company);
+    } else {
+      // create
+      return res.status(400).json({ message: "Error" });
+    }
+  },
+  /**
+   * sample_request_companyController.update()
+   */
+  sentSample: async function (req, res) {
+    const id = req.params.id;
+    const sample_request_company = await Sample_request_companyModel.findOne({
+      _id: id,
+    }).exec();
+    if (sample_request_company != null) {
+      // update
+      sample_request_company.sentsample = req.body.sentsample
+        ? req.body.sentsample
+        : sample_request_company.sentsample;
 
       await Sample_request_companyModel.updateOne(
         { _id: id },

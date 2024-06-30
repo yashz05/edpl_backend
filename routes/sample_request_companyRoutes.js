@@ -12,6 +12,7 @@ router.get('/', sample_request_companyController.list);
  */
 router.get('/:id', sample_request_companyController.show);
 router.get('/single/:id', sample_request_companyController.single);
+router.put('/marksent/:id', sample_request_companyController.sentSample);
 
 /*
  * POST

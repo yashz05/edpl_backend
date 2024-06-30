@@ -33,20 +33,25 @@ module.exports = {
    * photosController.create()
    */
   create: async function (req, res) {
-    // console.log(req.file)
-    const photos = new PhotosModel({
-      parent_dir: req.body.parent_dir,
-      sub_dir: req.body.sub_dir,
-      file_name: req.file.filename,
-      name : req.body.name
-    });
     try {
-      await PhotosModel.create(photos);
-      return res.status(201).json(photos);
+        const filesPromises = req.files.map(async (file) => {
+            const photo = new PhotosModel({
+                parent_dir: req.body.parent_dir,
+                sub_dir: req.body.sub_dir,
+                file_name: file.filename,
+                name: req.body.name
+            });
+            await photo.save();
+            return photo;
+        });
+
+        const photos = await Promise.all(filesPromises);
+        res.status(201).json(photos);
     } catch (e) {
-      return res.status(400).json({ message: "Error" + e });
+        res.status(400).json({ message: "Error: " + e });
     }
-  },
+},
+
 
 
 
