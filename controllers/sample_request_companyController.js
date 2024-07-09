@@ -57,7 +57,7 @@ module.exports = {
       company_name: req.body.company_name,
       type: req.body.type,
       data: req.body.data,
-      spid: req.body.spid,
+      spid: req.auth.uuid,
       sentsample: req.body.sentsample,
     });
     try {
@@ -93,8 +93,8 @@ module.exports = {
       sample_request_company.data = req.body.data
         ? req.body.data
         : sample_request_company.data;
-      sample_request_company.spid = req.body.spid
-        ? req.body.spid
+      sample_request_company.spid = req.auth.uuid
+        ? req.auth.uuid
         : sample_request_company.spid;
 
       await Sample_request_companyModel.updateOne(
