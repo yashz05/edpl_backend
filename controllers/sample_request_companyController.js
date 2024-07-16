@@ -93,9 +93,9 @@ module.exports = {
       sample_request_company.data = req.body.data
         ? req.body.data
         : sample_request_company.data;
-      sample_request_company.spid = req.auth.uuid
-        ? req.auth.uuid
-        : sample_request_company.spid;
+      // sample_request_company.spid = req.auth.uuid
+      //   ? req.auth.uuid
+      //   : sample_request_company.spid;
 
       await Sample_request_companyModel.updateOne(
         { _id: id },
