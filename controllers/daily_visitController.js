@@ -24,11 +24,11 @@ module.exports = {
     try {
       if (u.access.includes("admin")) {
         const sales_orders = await Daily_visitModel.find({
-          createdAt: {
-            $gte: todayStart, // Greater than or equal to today's start
-            $lt: todayEnd, // Less than today's end
-          },
-        }).exec();
+          // createdAt: {
+          //   $gte: todayStart, // Greater than or equal to today's start
+          //   $lt: todayEnd, // Less than today's end
+          // },
+        }).sort({ createdAt: -1 }).exec();
         if (sales_orders.length > 0) {
           return res.json(sales_orders);
         } else {

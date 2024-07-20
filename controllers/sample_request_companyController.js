@@ -10,8 +10,7 @@ module.exports = {
    * sample_request_companyController.list()
    */
   list: async function (req, res) {
-    const all = await Sample_request_companyModel.find({});
-
+    const all = await Sample_request_companyModel.find({}).sort({ createdAt: -1 }).exec();
     return res.json(all);
   },
 

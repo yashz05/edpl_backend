@@ -25,11 +25,10 @@ module.exports = {
     try {
       if (u.access.includes("admin")) {
         const sales_orders = await Daily_collectionModel.find({
-        
-          createdAt: {
-            $gte: todayStart, // Greater than or equal to today's start
-            $lt: todayEnd, // Less than today's end
-          },
+          // createdAt: {
+          //   $gte: todayStart, // Greater than or equal to today's start
+          //   $lt: todayEnd, // Less than today's end
+          // },
         }).exec();
         if (sales_orders.length > 0) {
           return res.json(sales_orders);
@@ -99,7 +98,7 @@ module.exports = {
       } else {
         const sales_orders = await Daily_collectionModel.find({
           spid: req.auth.uuid, // Filter by user's spid
-          customer_name: req.params.id, 
+          customer_name: req.params.id,
         }).exec();
 
         if (sales_orders.length > 0) {
