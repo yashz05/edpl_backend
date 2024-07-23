@@ -11,8 +11,9 @@ const sales_ordersSchema = new Schema(
     v_width: { type: String, default: "0" },
     v_length: { type: String, default: "0" },
     spid: String,
+    createdAt: { type: Date, default: Date.now },
   },
-  { timestamps: true }
+  { timestamps: { createdAt: true, updatedAt: true } }
 );
 
 module.exports = mongoose.model("sales_orders", sales_ordersSchema);

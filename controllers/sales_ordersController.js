@@ -23,7 +23,8 @@ module.exports = {
 
     try {
       if (u.access.includes("admin")) {
-        const sales_orders = await Sales_ordersModel.find({});
+   const sales_orders = await Sales_ordersModel.find({});
+
         if (sales_orders.length > 0) {
           return res.json(sales_orders);
         } else {
@@ -119,6 +120,7 @@ module.exports = {
       item_name: req.body.item_name,
       item_qty: req.body.item_qty,
       item_rate: req.body.item_rate,
+      createdAt: req.body.createdAt || new Date() // Use provided createdAt or default to current date
     });
     try {
       await Sales_ordersModel.create(sales_orders);
