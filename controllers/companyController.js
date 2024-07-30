@@ -18,13 +18,15 @@ module.exports = {
     });
     var all = [];
     if (u.access.includes("admin")) {
+      
       all = await CompanyModel.find({});
     } else {
       all = await CompanyModel.find({
         sid: req.auth.uuid,
       });
     }
-
+    //     _order: asc
+    // _sort: person_to_contact
     return res.json(all);
   },
 

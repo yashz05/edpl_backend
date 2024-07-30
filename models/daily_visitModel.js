@@ -7,10 +7,9 @@ const daily_visitSchema = new Schema(
     customer_name: String,
     data: Object,
     spid: String,
+    createdAt: { type: Date, default: Date.now },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: { createdAt: true, updatedAt: true } }
 );
 
 module.exports = mongoose.model("daily_visit", daily_visitSchema);

@@ -123,6 +123,7 @@ module.exports = {
       customer_name: req.body.customer_name,
       data: req.body.data,
       spid: req.auth.uuid,
+      createdAt: req.body.createdAt || new Date() // Use provided createdAt or default to current date
     });
     try {
       await Daily_visitModel.create(daily_visit);
