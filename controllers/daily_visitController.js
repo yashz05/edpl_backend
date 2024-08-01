@@ -38,11 +38,11 @@ module.exports = {
         }
       } else {
         const sales_orders = await Daily_visitModel.find({
-          spid: req.auth.uuid, // Filter by user's spid
-          createdAt: {
-            $gte: todayStart, // Greater than or equal to today's start
-            $lt: todayEnd, // Less than today's end
-          },
+          spid: req.auth.uuid // Filter by user's spid
+          // createdAt: {
+          //   $gte: todayStart, // Greater than or equal to today's start
+          //   $lt: todayEnd, // Less than today's end
+          // },
         }).exec();
 
         if (sales_orders.length > 0) {
