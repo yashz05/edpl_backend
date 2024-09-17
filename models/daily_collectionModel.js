@@ -4,7 +4,8 @@ const Schema   = mongoose.Schema;
 const daily_collectionSchema = new Schema({
 	'customer_name' : String,
 	'amount' : String,
-	'spid' : String
+	'spid' : String,
+	'remark': String
 },{
 	timestamps : true
 });

@@ -4,7 +4,7 @@ var cors = require("cors");
 var app = express();
 var { connect } = require("mongoose");
 var { expressjwt: jwt } = require("express-jwt");
-// var cache = require("./others/redis");
+// var cache = require("./others/redis") ;
 
 const jwt_secret = "cYvPcHRFzRHGLwflceKdSYJIbPmDdJ";
 var health = require("./health/health");
@@ -67,7 +67,7 @@ connect(process.env.MONOGODB_URL, {
 //   res.header("Access-Control-Allow-Origin", "*");
 //   res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
 //   res.header(
-//     "Access-Control-Allow-Headers",
+//     "Access-Control-Allow-Headers",ok
 //     "Content-Type, Authorization, Content-Length, X-Requested-With"
 //   );
 

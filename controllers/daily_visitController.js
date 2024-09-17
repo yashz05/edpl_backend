@@ -123,6 +123,7 @@ module.exports = {
       customer_name: req.body.customer_name,
       data: req.body.data,
       spid: req.auth.uuid,
+      // remark: req.body.remark, //remark added
       createdAt: req.body.createdAt || new Date() // Use provided createdAt or default to current date
     });
     try {
@@ -149,6 +150,8 @@ module.exports = {
         : daily_visit.customer_name;
       daily_visit.data = req.body.data ? req.body.data : daily_visit.data;
       daily_visit.spid = req.auth.uuid ? req.auth.uuid : daily_visit.spid;
+      //  remark added
+      // daily_visit.remark = req.body.remark ? req.body.remark : daily_visit.remark;
       await Daily_visitModel.updateOne({ _id: id }, daily_visit).exec();
       return res.json(daily_visit);
     } else {

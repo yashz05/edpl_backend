@@ -123,6 +123,7 @@ module.exports = {
       customer_name: req.body.customer_name,
       amount: req.body.amount,
       spid: req.auth.uuid,
+      remark: req.body.remark, // remark added
     });
     try {
       await Daily_collectionModel.create(daily_collection);
@@ -151,6 +152,10 @@ module.exports = {
       daily_collection.spid = req.body.spid
         ? req.body.spid
         : daily_collection.spid;
+        // remark
+        daily_collection.remark = req.body.remark
+        ? req.body.remark
+        : daily_collection.remark;
 
       await Daily_collectionModel.updateOne(
         { _id: id },

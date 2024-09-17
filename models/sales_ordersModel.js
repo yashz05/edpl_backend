@@ -8,6 +8,7 @@ const sales_ordersSchema = new Schema(
     item_name: String,
     item_qty: String,
     item_rate: String,
+    remark: String, //remark added
     v_width: { type: String, default: "0" },
     v_length: { type: String, default: "0" },
     spid: String,

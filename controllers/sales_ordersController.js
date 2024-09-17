@@ -120,6 +120,7 @@ module.exports = {
       item_name: req.body.item_name,
       item_qty: req.body.item_qty,
       item_rate: req.body.item_rate,
+      remark: req.body.remark,  //remark added
       createdAt: req.body.createdAt || new Date() // Use provided createdAt or default to current date
     });
     try {
@@ -153,12 +154,16 @@ module.exports = {
       sales_orders.item_rate = req.body.item_rate
         ? req.body.item_rate
         : sales_orders.item_rate;
-      sales_order.v_width = req.body.v_width
+        // remarks updating added
+        sales_orders.remark = req.body.remark
+        ? req.body.remark
+        : sales_orders.remark;
+        sales_orders.v_width = req.body.v_width
         ? req.body.v_width
-        : sales_order.v_width;
-      sales_order.v_length = req.body.v_length
+        : sales_orders.v_width;
+        sales_orders.v_length = req.body.v_length
         ? req.body.v_length
-        : sales_order.v_length;
+        : sales_orders.v_length;
       await Sales_ordersModel.updateOne({ _id: id }, sales_orders).exec();
       return res.json(sales_orders);
     } else {

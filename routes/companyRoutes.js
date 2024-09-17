@@ -30,12 +30,15 @@ router.put('/:id', companyController.update);
  * DELETE
  */
 router.delete('/:id', companyController.remove);
-router.get('/companies/search', async (req, res) => {
+router.get('/companies/search/:name', async (req, res) => {
     try {
-        const companyName = req.query.name;
+        const companyName = req.params.name;
 
-        // Perform the search based on the company name
-        const companies = await CompanyModel.find({ name: companyName });
+        // Perform the search based on partial company name using regex
+        const companies = await CompanyModel.find({ 
+            name: { $regex: companyName, $options: 'i' } // 'i' makes it case-insensitive
+        }).limit(5);
+        
         console.log(companyName);
 
         // Return the search results
@@ -45,5 +48,6 @@ router.get('/companies/search', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+
 
 module.exports = router;

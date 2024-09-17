@@ -27,7 +27,9 @@ module.exports = {
         if (sales_orders.length > 0) {
           return res.json(sales_orders);
         } else {
-          return res.json({ message: "No Dispatch orders found for today for admin." });
+          return res.json({
+            message: "No Dispatch orders found for today for admin.",
+          });
         }
       } else {
         const sales_orders = await Sales_ordersModel.find({
@@ -50,7 +52,6 @@ module.exports = {
     }
   },
 
-
   /**
    * sales_ordersController.show()
    */
@@ -63,7 +64,6 @@ module.exports = {
       return res.json({ message: "not found !" });
     }
   },
-
 
   summ: async function (req, res) {
     const spid = req.auth.uuid; // Assuming spid identifies the user
@@ -119,6 +119,8 @@ module.exports = {
       item_name: req.body.item_name,
       item_qty: req.body.item_qty,
       item_rate: req.body.item_rate,
+      //remark added
+      remark: req.body.remark,
     });
     try {
       await Sales_ordersModel.create(sales_orders);
@@ -157,6 +159,9 @@ module.exports = {
       sales_order.v_length = req.body.v_length
         ? req.body.v_length
         : sales_order.v_length;
+      sales_order.remark = req.body.remark
+        ? req.body.remark
+        : sales_order.remark;
       await Sales_ordersModel.updateOne({ _id: id }, sales_orders).exec();
       return res.json(sales_orders);
     } else {

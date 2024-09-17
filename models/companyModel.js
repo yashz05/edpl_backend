@@ -23,4 +23,16 @@ const companySchema = new Schema({
 },
 { timestamps: true });
 
+
+// to upper case befor displayin/storing the strng data
+companySchema.pre('save', function(next) {
+
+    for (let key in this.toObject()) {
+        if (typeof this[key] === 'string') {
+            this[key] = this[key].toUpperCase();
+        }
+    }
+    next();
+});
+
 module.exports = mongoose.model('company', companySchema);
