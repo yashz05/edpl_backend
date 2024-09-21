@@ -26,6 +26,7 @@ var sample_requests = require("./routes/sample_request_companyRoutes");
 var collection_requests = require("./routes/daily_collectionRoutes");
 var daily_visit = require("./routes/daily_visitRoutes");
 var catalogue = require("./routes/catalogueRoutes");
+var statecity = require("./routes/statecityRoutes");
 var admins = require("./routes/adminsRoutes");
 app.use(cors());
 app.use(express.json());
@@ -36,7 +37,7 @@ connect(process.env.MONOGODB_URL, {
 })
   .then(() => console.log("Connected to DB"))
   .catch((error) => console.error(error.message));
-  
+
 // CORS
 // var allowedOrigins = [
 //   "https://hoppscotch.io",
@@ -61,7 +62,6 @@ connect(process.env.MONOGODB_URL, {
 //   })
 // );
 
- 
 // CORS END
 // app.use(function (req, res, next) {
 //   res.header("Access-Control-Allow-Origin", "*");
@@ -136,6 +136,7 @@ app.use("/api/edpl/sample_requests", sample_requests);
 app.use("/api/edpl/collection_data", collection_requests);
 app.use("/api/edpl/daily_visit", daily_visit);
 app.use("/api/edpl/catalogue", catalogue); //dashboard done
+app.use("/api/edpl/statecity", statecity);
 // app.use("/api/edpl/admins", admins);r
 
 app.listen(8092, () => {
