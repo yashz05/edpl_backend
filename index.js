@@ -27,8 +27,11 @@ var collection_requests = require("./routes/daily_collectionRoutes");
 var daily_visit = require("./routes/daily_visitRoutes");
 var catalogue = require("./routes/catalogueRoutes");
 var statecity = require("./routes/statecityRoutes");
+var chartview = require("./routes/chartsview");
 var admins = require("./routes/adminsRoutes");
+// var compression = require('compression')
 app.use(cors());
+// app.use(compression())
 app.use(express.json());
 connect(process.env.MONOGODB_URL, {
   user: process.env.MONGO_USER,
@@ -137,6 +140,7 @@ app.use("/api/edpl/collection_data", collection_requests);
 app.use("/api/edpl/daily_visit", daily_visit);
 app.use("/api/edpl/catalogue", catalogue); //dashboard done
 app.use("/api/edpl/statecity", statecity);
+app.use("/api/edpl/extras", chartview);
 // app.use("/api/edpl/admins", admins);r
 
 app.listen(8092, () => {

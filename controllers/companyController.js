@@ -1,34 +1,98 @@
 const CompanyModel = require("../models/companyModel.js");
 const salesperson = require("../models/sales_teamModel.js");
-
+const { getOrAdd, redisClient,deleteKeysByPattern } = require("./../others/redis_cache.js");
+const zlib = require('zlib');
 /**
  * companyController.js
  *
  * @description :: Server-side logic for managing companys.
  */
 module.exports = {
-  
   /**
    * companyController.list()
    */
   list: async function (req, res) {
-    var users_type = [];
-    var u = await salesperson.findOne({
-      uuid: req.auth.uuid,
-    });
-    var all = [];
-    if (u.access.includes("admin")) {
-      
-      all = await CompanyModel.find({});
-    } else {
-      all = await CompanyModel.find({
-        sid: req.auth.uuid,
-      });
+    
+    // await deleteKeysByPattern(`*:${req.auth.uuid}`)
+    // res.json({})
+    try {
+        // Define the cache key with user-specific UUID
+        const cacheKey = `getAllCompany:${req.auth.uuid}`;
+        
+        // Check if data is cached
+        const cachedData = await redisClient.get(cacheKey);
+
+        if (cachedData) {
+            // If cached data exists, return it as JSON directly
+            return res.json(JSON.parse(cachedData));
+        }
+
+        // If data is not in the cache, fetch it from the database
+        let all = [];
+        const user = await salesperson.findOne({ uuid: req.auth.uuid });
+
+        if (user && user.access.includes("admin")) {
+            all = await CompanyModel.find({});
+        } else {
+            all = await CompanyModel.find({ sid: req.auth.uuid });
+        }
+
+        // Cache the fetched data with a 1-hour expiration
+        await redisClient.setEx(cacheKey, 3600, JSON.stringify(all));
+
+        // Send the fetched data as JSON
+        return res.json(all);
+        
+    } catch (error) {
+        console.error("Error in list function:", error);
+        return res.status(500).json({ message: "Server Error", error });
     }
-    //     _order: asc
-    // _sort: person_to_contact
-    return res.json(all);
-  },
+},
+  
+list2: async function (req, res) {
+  try {
+      const cacheKey = `getAllCompany:${req.auth.uuid}`;
+      const cachedData = await redisClient.get(cacheKey);
+
+      // if (cachedData) {
+      //     return res.json(JSON.parse(cachedData));
+      // }
+
+      let all = [];
+      const user = await salesperson.findOne({ uuid: req.auth.uuid });
+
+      if (user && user.access.includes("admin")) {
+          // Fetch all companies
+          all = await CompanyModel.find({});
+      } else {
+          // Fetch companies for the specific salesperson
+          all = await CompanyModel.find({ sid: req.auth.uuid });
+      }
+
+      // Manually populate the sid field with sales_team uuid details
+      const salesTeamData = await salesperson.find({ uuid: { $in: all.map(company => company.sid) } });
+      const salesTeamMap = {};
+      salesTeamData.forEach(member => {
+          salesTeamMap[member.uuid] = member;
+      });
+
+      // Attach sales team details to each company object
+      all = all.map(company => ({
+          ...company.toObject(),
+          sname: salesTeamMap[company.sid]?.name || null // Add sales team info if exists
+      }));
+
+      // Cache the fetched data with a 1-hour expiration
+      await redisClient.setEx(cacheKey, 3600, JSON.stringify(all));
+      // Send the fetched data as JSON
+      return res.json(all);
+  } catch (error) {
+      console.error("Error in list function:", error);
+      return res.status(500).json({ message: "Server Error", error });
+  }
+},
+
+
 
   getbyid: async function (req, res) {
     const all = await CompanyModel.find({
@@ -102,10 +166,14 @@ module.exports = {
    * companyController.update()
    */
   update: async function (req, res) {
+    console.log("UPDATE REQ");
     const id = req.params.id;
+    
     try {
       const company = await CompanyModel.findOne({ _id: id }).exec();
       if (company) {
+        console.log(req.body)
+      
         // Update company fields
         company.name =
           req.body.name !== undefined ? req.body.name : company.name;

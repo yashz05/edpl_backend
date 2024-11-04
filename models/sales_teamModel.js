@@ -6,7 +6,7 @@ const sales_teamSchema = new Schema(
     name: String,
     email: String,
     active: Boolean,
-    uuid: String,
+    uuid: { type: String, unique: true }, 
     password: String,
     access: {
       type: [String],

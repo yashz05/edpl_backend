@@ -7,6 +7,7 @@ const CompanyModel = require("../models/companyModel.js");
  * GET
  */
 router.get('/', companyController.list);
+router.get('/all', companyController.list2);
 router.options('/', companyController.list);
 router.get('/byid', companyController.getbyid);
 

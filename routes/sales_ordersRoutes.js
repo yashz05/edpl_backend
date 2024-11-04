@@ -11,9 +11,14 @@ router.get("/", sales_ordersController.list);
  * GET
  */
 router.get("/:id", sales_ordersController.show);
+
 /*
-* GET 
-*/
+ * GET
+ */
+// router.get("aggrigate/:id", sales_ordersController.aggrigate);
+/*
+ * GET
+ */
 router.get("/overview/:id", sales_ordersController.summ);
 
 /*

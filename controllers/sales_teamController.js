@@ -2,6 +2,11 @@ const Sales_teamModel = require("../models/sales_teamModel.js");
 const { cryptPassword, comparePassword } = require("./../others/password.js");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
+const {
+  getOrAdd,
+  redisClient,
+  deleteKeysByPattern,
+} = require("./../others/redis_cache.js");
 dotenv.config();
 
 /**
@@ -108,19 +113,25 @@ module.exports = {
     const id = req.params.id;
     const sales_team = await Sales_teamModel.findOne({ _id: id }).exec();
     if (sales_team != null) {
+      await deleteKeysByPattern(`*:${sales_team.uuid}`);
       // Update fields
+      // console.log(req.body.active);
       sales_team.name = req.body.name ? req.body.name : sales_team.name;
       sales_team.email = req.body.email ? req.body.email : sales_team.email;
-      sales_team.active = req.body.active ? req.body.active : sales_team.active;
+      sales_team.active = typeof req.body.active === 'boolean' ? req.body.active : sales_team.active;
+
       sales_team.uuid = req.body.uuid ? req.body.uuid : sales_team.uuid;
       sales_team.access = req.body.access ? req.body.access : sales_team.access;
-      if (req.body.password != sales_team.password) {
-        if (req.body.password != "" || req.body.password != null) {
-          sales_team.password = await cryptPassword(req.body.password);
-        } else {
-          sales_team.password = sales_team.password;
+      if (req.body.hasOwnProperty("password")) {
+        if (req.body.password != sales_team.password) {
+          if (req.body.password != "" || req.body.password != null) {
+            sales_team.password = await cryptPassword(req.body.password);
+          } else {
+            sales_team.password = sales_team.password;
+          }
         }
       }
+
       // if (req.body.password != "" || req.body.password != null) {
       //   sales_team.password = await cryptPassword(req.body.password);
       // } else {

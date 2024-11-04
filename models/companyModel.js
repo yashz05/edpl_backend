@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 const Schema   = mongoose.Schema;
+const sales_team = require("./sales_teamModel")
 
 const companySchema = new Schema({
 	'name' : String,
 	'address' : Object,
-	'sid' : String,
+	'sid': { type: String, ref: 'sales_team' }, // Keep this as a string
 	'area_of_company' : String,
 	'person_to_contact' : Array,
 	'customer_type' : String,

@@ -3,6 +3,7 @@ const csv = require("csv-parser");
 const fs = require("fs");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" }); // for file uploads
+const { getOrAdd, redisClient } = require("./../others/redis_cache.js");
 /**
  * laminate_dataController.js
  *
@@ -13,16 +14,37 @@ module.exports = {
    * laminate_dataController.list()
    */
   list: async function (req, res) {
-    var all  = []
-    if(req.query.hasOwnProperty('title_like')){
-      console.log(req.query.title_like)
-      all= await  Laminate_dataModel.find({ItemName: { $regex: '.*' + req.query.title_like + '.*' } }).limit(200);
-    }else{
-      all = await Laminate_dataModel.find({});
-    }
-    
+    try {
+      // Define the cache key with user-specific UUID
+      const cacheKey = `laminates`;
+      // Check if data is cached
 
-    return res.json(all);
+      const cachedData = await redisClient.get(cacheKey);
+
+      if (cachedData) {
+        // If cached data exists, return it as JSON
+        return res.json(JSON.parse(cachedData));
+      }
+
+      var all = [];
+      // if (req.query.hasOwnProperty("title_like")) {
+      //   console.log(req.query.title_like);
+      //   all = await Laminate_dataModel.find({
+      //     ItemName: { $regex: ".*" + req.query.title_like + ".*" },
+      //   }).limit(200);
+      //   await redisClient.setEx(`${cacheKey}${req.query.title_like}` , 30000, JSON.stringify(all));
+      // } else {
+      //   all = await Laminate_dataModel.find({});
+      // }
+      all = await Laminate_dataModel.find({});
+      // Cache the fetched data with a 1-hour expiration
+      await redisClient.setEx(`${cacheKey}` , 2592000, JSON.stringify(all));
+
+      // Send the fetched data as JSON
+      return res.json(all);
+    } catch (e) {
+      return res.status(500).json({ message: "Server Error", error });
+    }
   },
 
   /**
@@ -37,12 +59,14 @@ module.exports = {
       return res.json({ message: "not found !" });
     }
   },
-   /**
+  /**
    * laminate_dataController.search()
    */
   search: async function (req, res) {
     const id = req.params.id;
-    const laminate_data = await  Laminate_dataModel.find({name: { $regex: '.*' + req.query.title_like + '.*' } }).limit(200);
+    const laminate_data = await Laminate_dataModel.find({
+      name: { $regex: ".*" + req.query.title_like + ".*" },
+    }).limit(200);
     // Laminate_dataModel.find({name: { $regex: '.*' + req.query.title_like + '.*' } }).limit(5);
     if (laminate_data != null) {
       return res.json(laminate_data);
@@ -119,12 +143,10 @@ module.exports = {
             await Laminate_dataModel.insertMany(newItems);
           }
 
-          res
-            .status(201)
-            .json({
-              message: "Data processed successfully",
-              newItemsCount: newItems.length,
-            });
+          res.status(201).json({
+            message: "Data processed successfully",
+            newItemsCount: newItems.length,
+          });
         } catch (error) {
           res
             .status(500)
