@@ -23,7 +23,7 @@ module.exports = {
 
     try {
       if (u.access.includes("admin")) {
-   const sales_orders = await Sales_ordersModel.find({});
+        const sales_orders = await Sales_ordersModel.find({});
 
         if (sales_orders.length > 0) {
           return res.json(sales_orders);
@@ -52,7 +52,69 @@ module.exports = {
       return res.status(500).json({ message: "Internal server error" });
     }
   },
+  list2: async function (req, res) {
+    const spid = req.auth.uuid; // Assuming spid identifies the user
+    // Get today's date range
+    var users_type = [];
+    var u = await salesperson.findOne({
+      uuid: spid,
+    });
+    var all = [];
 
+    const todayStart = new Date().setHours(0, 0, 0, 0);
+    const todayEnd = new Date().setHours(23, 59, 59, 999);
+
+    try {
+      if (u.access.includes("admin")) {
+        var sales_orders = await Sales_ordersModel.find({});
+        const salesTeamData = await salesperson.find({
+          uuid: { $in: sales_orders.map((company) => company.spid) },
+        });
+        const salesTeamMap = {};
+        salesTeamData.forEach((member) => {
+          salesTeamMap[member.uuid] = member;
+        });
+        sales_orders = sales_orders.map((company) => ({
+          ...company.toObject(),
+          sname: salesTeamMap[company.spid]?.name || null, // Add sales team info if exists
+        }));
+        if (sales_orders.length > 0) {
+          return res.json(sales_orders);
+        } else {
+          return res.json({
+            message: "No sales orders found for today for admin.",
+          });
+        }
+      } else {
+        var sales_orders = await Sales_ordersModel.find({
+          spid: req.auth.uuid, // Filter by user's spid
+          createdAt: {
+            $gte: todayStart, // Greater than or equal to today's start
+            $lt: todayEnd, // Less than today's end
+          },
+        }).exec();
+        const salesTeamData = await salesperson.find({
+          uuid: { $in: sales_orders.map((company) => company.spid) },
+        });
+        const salesTeamMap = {};
+        salesTeamData.forEach((member) => {
+          salesTeamMap[member.uuid] = member;
+        });
+        sales_orders = sales_orders.map((company) => ({
+          ...company.toObject(),
+          sname: salesTeamMap[company.spid]?.name || null, // Add sales team info if exists
+        }));
+        if (sales_orders.length > 0) {
+          return res.json(sales_orders);
+        } else {
+          return res.json({ message: "No sales orders found for today." });
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  },
   /**
    * sales_ordersController.show()
    */
@@ -120,8 +182,8 @@ module.exports = {
       item_name: req.body.item_name,
       item_qty: req.body.item_qty,
       item_rate: req.body.item_rate,
-      remark: req.body.remark,  //remark added
-      createdAt: req.body.createdAt || new Date() // Use provided createdAt or default to current date
+      remark: req.body.remark, //remark added
+      createdAt: req.body.createdAt || new Date(), // Use provided createdAt or default to current date
     });
     try {
       await Sales_ordersModel.create(sales_orders);
@@ -154,14 +216,14 @@ module.exports = {
       sales_orders.item_rate = req.body.item_rate
         ? req.body.item_rate
         : sales_orders.item_rate;
-        // remarks updating added
-        sales_orders.remark = req.body.remark
+      // remarks updating added
+      sales_orders.remark = req.body.remark
         ? req.body.remark
         : sales_orders.remark;
-        sales_orders.v_width = req.body.v_width
+      sales_orders.v_width = req.body.v_width
         ? req.body.v_width
         : sales_orders.v_width;
-        sales_orders.v_length = req.body.v_length
+      sales_orders.v_length = req.body.v_length
         ? req.body.v_length
         : sales_orders.v_length;
       await Sales_ordersModel.updateOne({ _id: id }, sales_orders).exec();

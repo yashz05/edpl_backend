@@ -1,7 +1,11 @@
 const CompanyModel = require("../models/companyModel.js");
 const salesperson = require("../models/sales_teamModel.js");
-const { getOrAdd, redisClient,deleteKeysByPattern } = require("./../others/redis_cache.js");
-const zlib = require('zlib');
+const {
+  getOrAdd,
+  redisClient,
+  deleteKeysByPattern,
+} = require("./../others/redis_cache.js");
+const zlib = require("zlib");
 /**
  * companyController.js
  *
@@ -12,87 +16,105 @@ module.exports = {
    * companyController.list()
    */
   list: async function (req, res) {
-    
     // await deleteKeysByPattern(`*:${req.auth.uuid}`)
     // res.json({})
     try {
-        // Define the cache key with user-specific UUID
-        const cacheKey = `getAllCompany:${req.auth.uuid}`;
-        
-        // Check if data is cached
-        const cachedData = await redisClient.get(cacheKey);
-
-        if (cachedData) {
-            // If cached data exists, return it as JSON directly
-            return res.json(JSON.parse(cachedData));
-        }
-
-        // If data is not in the cache, fetch it from the database
-        let all = [];
-        const user = await salesperson.findOne({ uuid: req.auth.uuid });
-
-        if (user && user.access.includes("admin")) {
-            all = await CompanyModel.find({});
-        } else {
-            all = await CompanyModel.find({ sid: req.auth.uuid });
-        }
-
-        // Cache the fetched data with a 1-hour expiration
-        await redisClient.setEx(cacheKey, 3600, JSON.stringify(all));
-
-        // Send the fetched data as JSON
-        return res.json(all);
-        
-    } catch (error) {
-        console.error("Error in list function:", error);
-        return res.status(500).json({ message: "Server Error", error });
-    }
-},
-  
-list2: async function (req, res) {
-  try {
+      // Define the cache key with user-specific UUID
       const cacheKey = `getAllCompany:${req.auth.uuid}`;
+
+      // Check if data is cached
       const cachedData = await redisClient.get(cacheKey);
 
       // if (cachedData) {
-      //     return res.json(JSON.parse(cachedData));
+      //   // If cached data exists, return it as JSON directly
+      //   return res.json(JSON.parse(cachedData));
       // }
 
+      // If data is not in the cache, fetch it from the database
       let all = [];
       const user = await salesperson.findOne({ uuid: req.auth.uuid });
 
       if (user && user.access.includes("admin")) {
-          // Fetch all companies
-          all = await CompanyModel.find({});
+        all = await CompanyModel.find({});
       } else {
-          // Fetch companies for the specific salesperson
-          all = await CompanyModel.find({ sid: req.auth.uuid });
+        all = await CompanyModel.find({ sid: req.auth.uuid });
       }
-
-      // Manually populate the sid field with sales_team uuid details
-      const salesTeamData = await salesperson.find({ uuid: { $in: all.map(company => company.sid) } });
-      const salesTeamMap = {};
-      salesTeamData.forEach(member => {
-          salesTeamMap[member.uuid] = member;
-      });
-
-      // Attach sales team details to each company object
-      all = all.map(company => ({
-          ...company.toObject(),
-          sname: salesTeamMap[company.sid]?.name || null // Add sales team info if exists
-      }));
 
       // Cache the fetched data with a 1-hour expiration
       await redisClient.setEx(cacheKey, 3600, JSON.stringify(all));
+
       // Send the fetched data as JSON
       return res.json(all);
-  } catch (error) {
+    } catch (error) {
       console.error("Error in list function:", error);
       return res.status(500).json({ message: "Server Error", error });
-  }
-},
+    }
+  },
 
-
+  list2: async function (req, res) {
+    try {
+      const cacheKey = `getAllCompany:${req.auth.uuid}`;
+      const cachedData = await redisClient.get(cacheKey);
+  
+      if (cachedData) {
+        // Return cached data if present and valid
+        const parsedData = JSON.parse(cachedData);
+        if (Array.isArray(parsedData) && parsedData.length > 0) {
+          return res.json(parsedData);
+        }
+      }
+  
+      let allCompanies = [];
+      const user = await salesperson.findOne({ uuid: req.auth.uuid });
+  
+      if (user) {
+        if (user.access.includes("admin")) {
+          // Fetch all companies if the user is an admin
+          const companyCount = await CompanyModel.countDocuments({});
+          if (cachedData && companyCount === JSON.parse(cachedData).length) {
+            return res.json(JSON.parse(cachedData));
+          } else {
+            allCompanies = await CompanyModel.find({});
+          }
+        } else {
+          // Fetch companies for the specific salesperson
+          const companyCount = await CompanyModel.countDocuments({ sid: req.auth.uuid });
+          if (cachedData && companyCount === JSON.parse(cachedData).length) {
+            return res.json(JSON.parse(cachedData));
+          } else {
+            allCompanies = await CompanyModel.find({ sid: req.auth.uuid });
+          }
+        }
+  
+        // Populate `sid` field with sales team details
+        const salesTeamData = await salesperson.find({
+          uuid: { $in: allCompanies.map((company) => company.sid) },
+        });
+        const salesTeamMap = salesTeamData.reduce((acc, member) => {
+          acc[member.uuid] = member;
+          return acc;
+        }, {});
+  
+        // Attach sales team details to each company object
+        allCompanies = allCompanies.map((company) => ({
+          ...company.toObject(),
+          sname: salesTeamMap[company.sid]?.name || null,
+        }));
+  
+        // Cache the fetched data with a 1-hour expiration
+        await redisClient.setEx(cacheKey, 3600, JSON.stringify(allCompanies));
+  
+        // Send the response
+        return res.json(allCompanies);
+      } else {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+    } catch (error) {
+      console.error("Error in list2 function:", error);
+      return res.status(500).json({ message: "Server Error", error });
+    }
+  },
+  
 
   getbyid: async function (req, res) {
     const all = await CompanyModel.find({
@@ -168,12 +190,12 @@ list2: async function (req, res) {
   update: async function (req, res) {
     console.log("UPDATE REQ");
     const id = req.params.id;
-    
+
     try {
       const company = await CompanyModel.findOne({ _id: id }).exec();
       if (company) {
-        console.log(req.body)
-      
+        console.log(req.body);
+
         // Update company fields
         company.name =
           req.body.name !== undefined ? req.body.name : company.name;

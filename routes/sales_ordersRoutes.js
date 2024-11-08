@@ -6,6 +6,7 @@ const sales_ordersController = require("../controllers/sales_ordersController.js
  * GET
  */
 router.get("/", sales_ordersController.list);
+router.get("/all", sales_ordersController.list2);
 
 /*
  * GET
