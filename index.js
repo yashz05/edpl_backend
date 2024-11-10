@@ -29,9 +29,12 @@ var catalogue = require("./routes/catalogueRoutes");
 var statecity = require("./routes/statecityRoutes");
 var chartview = require("./routes/chartsview");
 var admins = require("./routes/adminsRoutes");
+const compression = require("compression");
 // var compression = require('compression')
 app.use(cors());
-// app.use(compression())
+app.use(compression({
+  level :9
+}))
 app.use(express.json());
 connect(process.env.MONOGODB_URL, {
   user: process.env.MONGO_USER,

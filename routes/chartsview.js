@@ -10,4 +10,7 @@ router.get("/companybyhistory", charts.getCompanyCountsByHistory);
 router.get("/companybymonth", charts.companyCountByMonth);
 router.get("/companyYearanal/:companyName", charts.companyYearanal);
 router.post("/companyoverview/", charts.overviewCompany);
+router.post("/companySales/records", charts.companySalesRecord);
+router.post("/companySales/types", charts.companySalesTypes);
+router.post("/companySales/salesPersonrecords", charts.SalesPersonSalesRecord);
 module.exports = router;

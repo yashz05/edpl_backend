@@ -6,7 +6,11 @@ const moment = require("moment");
 const daily_collectionModel = require("../models/daily_collectionModel");
 const Company = require("../models/companyModel");
 const OpenAI = require("openai");
-const { getOrAdd, redisClient,deleteKeysByPattern } = require("./../others/redis_cache.js");
+const {
+  getOrAdd,
+  redisClient,
+  deleteKeysByPattern,
+} = require("./../others/redis_cache.js");
 /**
  * catalogueController.js
  *
@@ -18,7 +22,7 @@ const openai = new OpenAI({
 });
 
 async function overviewOfCompany(data) {
-  const cacheKey = `companySummary:${data['name']}`; // Unique cache key based on data
+  const cacheKey = `companySummary:${data["name"]}`; // Unique cache key based on data
 
   try {
     // Check if response is in cache
@@ -45,7 +49,11 @@ async function overviewOfCompany(data) {
     const summary = completion.choices[0].message.content;
 
     // Cache the response in Redis for one year (in seconds)
-    await redisClient.setEx(cacheKey, 60 * 60 * 24 * 365, JSON.stringify(summary));
+    await redisClient.setEx(
+      cacheKey,
+      60 * 60 * 24 * 365,
+      JSON.stringify(summary)
+    );
 
     return summary;
   } catch (error) {
@@ -1181,6 +1189,219 @@ module.exports = {
     } catch (error) {
       console.error("Error fetching monthly summary:", error);
       res.status(500).json({ message: "Server Error" });
+    }
+  },
+
+  companySalesRecord: async function (req, res) {
+    const spid = req.auth.uuid;
+    const name = req.body.name;
+
+    try {
+      const user = await salesperson.findOne({ uuid: spid });
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      let salesData;
+
+      const commonPipeline = [
+        {
+          $match: user.access.includes("admin")
+            ? { company_name: name }
+            : { spid: spid, company_name: name },
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: "$createdAt" },
+              month: { $month: "$createdAt" },
+              day: { $dayOfMonth: "$createdAt" },
+            },
+            total: { $sum: 1 },
+            totalValue: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$item_type", "Laminate"] },
+                  {
+                    $multiply: [
+                      { $toInt: { $trim: { input: "$item_qty" } } },
+                      { $toInt: { $trim: { input: "$item_rate" } } },
+                    ],
+                  },
+                  {
+                    $multiply: [
+                      { $toInt: { $trim: { input: "$item_qty" } } },
+                      { $toInt: { $trim: { input: "$item_rate" } } },
+                      { $toInt: { $trim: { input: "$v_width" } } },
+                      { $toInt: { $trim: { input: "$v_length" } } },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        },
+        {
+          $addFields: {
+            date: {
+              $dateFromParts: {
+                year: "$_id.year",
+                month: "$_id.month",
+                day: "$_id.day",
+              },
+            },
+          },
+        },
+
+        {
+          $project: {
+            _id: 0, // Exclude the original _id field
+            date: { $dateToString: { format: "%d/%m/%Y", date: "$date" } },
+            total: 1,
+            totalValue: 1,
+          },
+        },
+        {
+          $sort: {
+            date: 1,
+          },
+        },
+      ];
+
+      salesData = await salesOrders.aggregate(commonPipeline);
+
+      return res.json(salesData);
+    } catch (error) {
+      console.error("Error fetching sales record:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  },
+
+  companySalesTypes: async function (req, res) {
+    const spid = req.auth.uuid;
+    const name = req.body.name;
+
+    try {
+      const user = await salesperson.findOne({ uuid: spid });
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const commonPipeline = [
+        {
+          $match: user.access.includes("admin")
+            ? { company_name: name }
+            : { spid: spid, company_name: name },
+        },
+        {
+          $group: {
+            _id: "$item_type",
+            total: { $sum: 1 }, // Count of records for each item type
+          },
+        },
+        {
+          $sort: {
+            total: -1, // Sort by total count in descending order
+          },
+        },
+        {
+          $addFields: {
+            fill: { $concat: ["var(--color-", "$_id", ")"] },
+          },
+        },
+      ];
+
+      const salesData = await salesOrders.aggregate(commonPipeline);
+
+      return res.json(salesData);
+    } catch (error) {
+      console.error("Error fetching sales record:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  },
+
+  SalesPersonSalesRecord: async function (req, res) {
+    const spid = req.auth.uuid;
+    const sales_person = req.body.name;
+
+    try {
+      const user = await salesperson.findOne({ uuid: spid });
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      let salesData;
+
+      const commonPipeline = [
+        {
+          $match: user.access.includes("admin")
+            ? { spid: sales_person }
+            : { spid: spid },
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: "$createdAt" },
+              month: { $month: "$createdAt" },
+            },
+            total: { $sum: 1 },
+            totalValue: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$item_type", "Laminate"] },
+                  {
+                    $multiply: [
+                      { $toInt: { $trim: { input: "$item_qty" } } },
+                      { $toInt: { $trim: { input: "$item_rate" } } },
+                    ],
+                  },
+                  {
+                    $multiply: [
+                      { $toInt: { $trim: { input: "$item_qty" } } },
+                      { $toInt: { $trim: { input: "$item_rate" } } },
+                      { $toInt: { $trim: { input: "$v_width" } } },
+                      { $toInt: { $trim: { input: "$v_length" } } },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        },
+        {
+          $addFields: {
+            date: {
+              $dateFromParts: {
+                year: "$_id.year",
+                month: "$_id.month",
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0, // Exclude the original _id field
+            date: { $dateToString: { format: "%m/%Y", date: "$date" } },
+            total: 1,
+            totalValue: 1,
+          },
+        },
+        {
+          $sort: {
+            date: 1,
+          },
+        },
+      ];
+
+      salesData = await salesOrders.aggregate(commonPipeline);
+
+      return res.json(salesData);
+    } catch (error) {
+      console.error("Error fetching sales record:", error);
+      return res.status(500).json({ error: "Internal server error" });
     }
   },
 
