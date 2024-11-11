@@ -5,7 +5,10 @@ const daily_collectionController = require("../controllers/daily_collectionContr
 /*
  * GET
  */
-router.get("/", daily_collectionController.list);
+router.get("/", daily_collectionController.list);/*
+ * GET
+ */
+router.get("/all", daily_collectionController.all);
 
 /*
  * GET
