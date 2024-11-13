@@ -11,6 +11,7 @@ const {
   redisClient,
   deleteKeysByPattern,
 } = require("./../others/redis_cache.js");
+const companyModel = require("../models/companyModel");
 /**
  * catalogueController.js
  *
@@ -28,7 +29,7 @@ async function overviewOfCompany(data) {
     // Check if response is in cache
     const cachedSummary = await redisClient.get(cacheKey);
     if (cachedSummary) {
-      console.log("Returning cached summary");
+      
       return JSON.parse(cachedSummary);
     }
 
@@ -186,7 +187,7 @@ module.exports = {
 
       res.json(results);
     } catch (e) {
-      console.log(e);
+      
     }
   },
 
@@ -361,7 +362,7 @@ module.exports = {
 
       res.json(data);
     } catch (e) {
-      console.log(e);
+      
     }
   },
   graphadminCurrentMonth: async function (req, res) {
@@ -524,7 +525,7 @@ module.exports = {
 
       res.json(result);
     } catch (e) {
-      console.log(e);
+      
       res
         .status(500)
         .json({ error: "An error occurred while fetching the data." });
@@ -728,7 +729,7 @@ module.exports = {
 
       res.json(mergedResults);
     } catch (e) {
-      console.log(e);
+      
       res
         .status(500)
         .json({ error: "An error occurred while fetching the data." });
@@ -928,7 +929,7 @@ module.exports = {
         });
       }
     } catch (e) {
-      console.log(e);
+      
     }
   },
 
@@ -993,7 +994,7 @@ module.exports = {
         },
       ]);
 
-      console.log(counts);
+      
 
       res.json(counts);
     } catch (error) {
@@ -1399,6 +1400,166 @@ module.exports = {
       salesData = await salesOrders.aggregate(commonPipeline);
 
       return res.json(salesData);
+    } catch (error) {
+      console.error("Error fetching sales record:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  },
+
+  // COLLECTION
+
+  companyCollectionRecord: async function (req, res) {
+    const spid = req.auth.uuid;
+    const name = req.body.name;
+
+    try {
+      
+      const user = await salesperson.findOne({ uuid: spid });
+
+      if (!user) {
+        
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      
+
+      if (name) {
+        
+        const commonPipeline = [
+          {
+            $match: user.access.includes("admin")
+              ? { customer_name: name }
+              : { spid: spid, customer_name: name },
+          },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAt" },
+                month: { $month: "$createdAt" },
+                day: { $dayOfMonth: "$createdAt" },
+              },
+              total: { $sum: 1 },
+              totalValue: {
+                $sum: { $toDouble: "$amount" },
+              },
+            },
+          },
+          {
+            $addFields: {
+              date: {
+                $dateFromParts: {
+                  year: "$_id.year",
+                  month: "$_id.month",
+                  day: "$_id.day",
+                },
+              },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              date: { $dateToString: { format: "%d/%m/%Y", date: "$date" } },
+              total: 1,
+              totalValue: 1,
+            },
+          },
+          {
+            $sort: {
+              date: 1,
+            },
+          },
+        ];
+
+        const dc = await daily_collectionModel.aggregate(commonPipeline);
+        
+
+        if (dc.length === 0) {
+          
+        }
+
+        return res.json(dc);
+      } else {
+        
+        return res.status(400).json({ message: "Company not found" });
+      }
+    } catch (error) {
+      console.error("Error fetching sales record:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  },
+
+  SalesPersonCollectionRecord: async function (req, res) {
+    const spid = req.auth.uuid;
+    const name = req.body.name;
+
+    try {
+      
+      const user = await salesperson.findOne({ uuid: spid });
+
+      if (!user) {
+        
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      
+
+      if (name) {
+        
+        const commonPipeline = [
+          {
+            $match: user.access.includes("admin")
+              ? { spid: name }
+              : { spid: spid },
+          },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAt" },
+                month: { $month: "$createdAt" },
+              },
+              total: { $sum: 1 },
+              totalValue: {
+                $sum: { $toDouble: "$amount" },
+              },
+            },
+          },
+          {
+            $addFields: {
+              date: {
+                $dateFromParts: {
+                  year: "$_id.year",
+                  month: "$_id.month",
+                },
+              },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              date: { $dateToString: { format: "%m/%Y", date: "$date" } },
+              total: 1,
+              totalValue: 1,
+            },
+          },
+          {
+            $sort: {
+              date: 1,
+            },
+          },
+        ];
+
+        const dc = await daily_collectionModel.aggregate(commonPipeline);
+        
+
+        if (dc.length === 0) {
+          
+        }
+
+        return res.json(dc);
+      } else {
+        
+        return res.status(400).json({ message: "Company not found" });
+      }
     } catch (error) {
       console.error("Error fetching sales record:", error);
       return res.status(500).json({ error: "Internal server error" });

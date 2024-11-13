@@ -28,7 +28,9 @@ module.exports = {
           //   $gte: todayStart, // Greater than or equal to today's start
           //   $lt: todayEnd, // Less than today's end
           // },
-        }).sort({ createdAt: -1 }).exec();
+        })
+          .sort({ createdAt: -1 })
+          .exec();
         if (sales_orders.length > 0) {
           return res.json(sales_orders);
         } else {
@@ -38,7 +40,7 @@ module.exports = {
         }
       } else {
         const sales_orders = await Daily_visitModel.find({
-          spid: req.auth.uuid // Filter by user's spid
+          spid: req.auth.uuid, // Filter by user's spid
           // createdAt: {
           //   $gte: todayStart, // Greater than or equal to today's start
           //   $lt: todayEnd, // Less than today's end
@@ -58,7 +60,74 @@ module.exports = {
       return res.status(500).json({ message: "Internal server error" });
     }
   },
+  /**
+   * daily_visitController.list()
+   */
+  all: async function (req, res) {
+    var spid = req.auth.uuid; // Assuming spid identifies the user
+    // Get today's date range
+    var users_type = [];
+    var u = await salesperson.findOne({
+      uuid: spid,
+    });
+    var all = [];
 
+    var todayStart = new Date().setHours(0, 0, 0, 0);
+    var todayEnd = new Date().setHours(23, 59, 59, 999);
+
+    try {
+      if (u.access.includes("admin")) {
+        var sales_orders = await Daily_visitModel.find({
+          // createdAt: {
+          //   $gte: todayStart, // Greater than or equal to today's start
+          //   $lt: todayEnd, // Less than today's end
+          // },
+        })
+          .sort({ createdAt: -1 })
+          .exec();
+          var salesTeamData = await salesperson.find({
+            uuid: { $in: sales_orders.map((company) => company.spid) },
+          });
+          var salesTeamMap = {};
+          salesTeamData.forEach((member) => {
+            salesTeamMap[member.uuid] = member;
+          });
+          sales_orders = sales_orders.map((company) => ({
+            ...company.toObject(),
+            sname: salesTeamMap[company.spid]?.name || null, // Add sales team info if exists
+          }));
+        if (sales_orders.length > 0) {
+          return res.json(sales_orders);
+        } else {
+          return res.json({
+            message: "No Daily Collection orders found for today for admin.",
+          });
+        }
+      } else {
+        var sales_orders = await Daily_visitModel.find({
+          spid: req.auth.uuid, // Filter by user's spid
+          // createdAt: {
+          //   $gte: todayStart, // Greater than or equal to today's start
+          //   $lt: todayEnd, // Less than today's end
+          // },
+        }).exec();
+        sales_orders = sales_orders.map((company) => ({
+          ...company.toObject(),
+          sname: u?.name || null, // Add sales team info if exists
+        }));
+        if (sales_orders.length > 0) {
+          return res.json(sales_orders);
+        } else {
+          return res.json({
+            message: "No  Daily Collection  orders found for today.",
+          });
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  },
   summ: async function (req, res) {
     const spid = req.auth.uuid; // Assuming spid identifies the user
     // Get today's date range
@@ -117,14 +186,14 @@ module.exports = {
    * daily_visitController.create()
    */
   create: async function (req, res) {
-    console.log(req.auth.uuid);
+    
     const daily_visit = new Daily_visitModel({
       company_name: req.body.company_name,
       customer_name: req.body.customer_name,
       data: req.body.data,
       spid: req.auth.uuid,
       // remark: req.body.remark, //remark added
-      createdAt: req.body.createdAt || new Date() // Use provided createdAt or default to current date
+      createdAt: req.body.createdAt || new Date(), // Use provided createdAt or default to current date
     });
     try {
       await Daily_visitModel.create(daily_visit);

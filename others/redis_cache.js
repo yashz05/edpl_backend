@@ -31,7 +31,7 @@ module.exports = {
 
   deleteKeysByPattern: async function (pattern) {
     var keys = await redisClient.keys(pattern);
-    // console.log(n);
+    // 
 
     if (keys.length > 0) {
       const multi = redisClient.multi(); // Create a multi command to delete keys
@@ -40,12 +40,12 @@ module.exports = {
         if (err) {
           console.error("Error deleting keys:", err);
         } else {
-          console.log(`Deleted keys: ${keys}`);
+          
         }
         // redisClient.quit(); // Close the Redis connection
       });
     } else {
-      // console.log("No keys found for the given pattern.");
+      // 
       // redisClient.quit(); // Close the Redis connection
     }
   },

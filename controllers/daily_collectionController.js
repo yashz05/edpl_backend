@@ -223,9 +223,7 @@ module.exports = {
       daily_collection.amount = req.body.amount
         ? req.body.amount
         : daily_collection.amount;
-      daily_collection.spid = req.body.spid
-        ? req.body.spid
-        : daily_collection.spid;
+     
       // remark
       daily_collection.remark = req.body.remark
         ? req.body.remark

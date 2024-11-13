@@ -9,7 +9,7 @@ env.config({path:'./../.env'})
 
 
 const client = createClient();
-client.on('error', err => console.log('Redis Client Error', err));
+client.on('error', err => 
 (async () => {
     await client.connect();
 })();
@@ -17,7 +17,7 @@ connect(process.env.MONOGODB_URL,{
     user : process.env.MONGO_USER,
     pass : process.env.MONGO_PSWD,
     authSource:"admin",
-  }).then(()=>console.log('Connected to DB')).catch(error=>console.error(error.message))
+  }).then(()=>
 
 async function cache_process(){
     var data =  await cache_queueModel.find({}) 
@@ -33,9 +33,9 @@ async function cache_process(){
     if(count > 0){
         try{
             var n = JSON.parse(single_record['value'])
-            console.log(single_record);
+            
             if(typeof n === 'object' && Array.isArray(n) == false){
-                console.log(await client.type(single_record['key']));
+                
 
 
                 // check if exisiting one same type or delete
@@ -70,11 +70,11 @@ async function cache_process(){
         }catch(e){
     
             // its not array or obj just add to cache
-            console.log(e);
+            
     
         }   
     }else{
-        console.log("QUEUE IS EMPTY !")
+        
     }
   
 }

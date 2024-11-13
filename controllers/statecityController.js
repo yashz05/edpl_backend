@@ -1270,7 +1270,7 @@ module.exports = {
     // Insert the data into the collection
     StatecityModel.insertMany(dataToInsert)
       .then(() => {
-        console.log("Data inserted successfully");
+        
       })
       .catch((err) => {
         console.error("Error inserting data:", err);

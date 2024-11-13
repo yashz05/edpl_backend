@@ -115,7 +115,7 @@ module.exports = {
     if (sales_team != null) {
       await deleteKeysByPattern(`*:${sales_team.uuid}`);
       // Update fields
-      // console.log(req.body.active);
+      // 
       sales_team.name = req.body.name ? req.body.name : sales_team.name;
       sales_team.email = req.body.email ? req.body.email : sales_team.email;
       sales_team.active = typeof req.body.active === 'boolean' ? req.body.active : sales_team.active;

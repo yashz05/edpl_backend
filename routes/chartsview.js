@@ -13,4 +13,6 @@ router.post("/companyoverview/", charts.overviewCompany);
 router.post("/companySales/records", charts.companySalesRecord);
 router.post("/companySales/types", charts.companySalesTypes);
 router.post("/companySales/salesPersonrecords", charts.SalesPersonSalesRecord);
+router.post("/companyCollections/records", charts.companyCollectionRecord);
+router.post("/companyCollections/salesPersonrecords", charts.SalesPersonCollectionRecord);
 module.exports = router;

@@ -166,8 +166,8 @@ list2: async function (req, res) {
    */
 
   create: async function (req, res) {
-    console.log(req);
-    console.log(req.body);
+    
+    
 
     try {
       // Check if a company with the same name already exists
@@ -213,13 +213,13 @@ list2: async function (req, res) {
    * companyController.update()
    */
   update: async function (req, res) {
-    console.log("UPDATE REQ");
+    
     const id = req.params.id;
 
     try {
       const company = await CompanyModel.findOne({ _id: id }).exec();
       if (company) {
-        console.log(req.body);
+        
 
         // Update company fields
         company.name =

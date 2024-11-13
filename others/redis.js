@@ -9,7 +9,7 @@ const cache_queueModel = require('./../models/cache_queueModel');
 env.config()
 const client = createClient();
 
-client.on('error', err => console.log('Redis Client Error', err));
+client.on('error', err => 
 (async () => {
     await client.connect();
 })();
@@ -39,10 +39,10 @@ async function cachecheck(key, value, req, res, reqtype) {
     var status = process.env.REDIS_ENABLE ?? false
 
     if (status === 'true') {
-        console.log("cache processsing")
+        
         var datatype = await client.type(key)
         let data = null
-        console.log(datatype)
+        
         var response = null
         if (datatype != 'hash') {
             data = await client.get(key);
@@ -69,12 +69,12 @@ async function cachecheck(key, value, req, res, reqtype) {
 
             // compare cache + value
             if (response === true) {
-                console.log("FORWARD CACHE RESPONSE")
+                
                 res.json(data)
             } else {
-                console.log("FORWARD ACTUALL RESPONSE")
+                
                 res.json(value)
-                console.log("SEND DATA TO QUEUE")
+                
                 cache_queueModel.create({
                     'key': key,
                     'value': JSON.stringify(value)
@@ -84,9 +84,9 @@ async function cachecheck(key, value, req, res, reqtype) {
 
         }
         else if (reqtype == "u") {
-            console.log("FORWARD ACTUALL RESPONSE")
+            
             res.json(data)
-            console.log("SEND DATA TO QUEUE")
+            
             cache_queueModel.create({
                 'key': key,
                 'value': value
@@ -94,9 +94,9 @@ async function cachecheck(key, value, req, res, reqtype) {
             racecondition(key)
         }
         else if (reqtype == "d") {
-            console.log("FORWARD ACTUALL RESPONSE")
+            
             res.json(data)
-            console.log("SEND DATA TO QUEUE")
+            
             cache_queueModel.create({
                 'key': key,
                 'value': value
@@ -107,7 +107,7 @@ async function cachecheck(key, value, req, res, reqtype) {
 
 
         // if(Object.keys(data).length === 0 || data == null){
-        //     console.log("Cache MISS");
+        //     
         //       // cache save
         //       if(datatype === 'string'){
         //         data =  await client.set(key,value);

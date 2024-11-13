@@ -28,7 +28,7 @@ module.exports = {
 
       var all = [];
       // if (req.query.hasOwnProperty("title_like")) {
-      //   console.log(req.query.title_like);
+      //   
       //   all = await Laminate_dataModel.find({
       //     ItemName: { $regex: ".*" + req.query.title_like + ".*" },
       //   }).limit(200);

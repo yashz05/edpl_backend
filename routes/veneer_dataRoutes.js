@@ -46,7 +46,7 @@ router.get('/veneer/search/:name', async (req, res) => {
         ItemName: { $regex: companyName, $options: 'i' } // 'i' makes it case-insensitive
       }).limit(5);
       
-      console.log(companyName);
+      
 
       // Return the search results
       res.status(200).json(companies);

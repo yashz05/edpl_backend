@@ -41,7 +41,7 @@ connect(process.env.MONOGODB_URL, {
   pass: process.env.MONGO_PSWD,
   authSource: "admin",
 })
-  .then(() => console.log("Connected to DB"))
+  .then(() => console.log("connected"))
   .catch((error) => console.error(error.message));
 
 // CORS
@@ -147,5 +147,5 @@ app.use("/api/edpl/extras", chartview);
 // app.use("/api/edpl/admins", admins);r
 
 app.listen(8092, () => {
-  console.log("APP STARTED " + jwt_secret);
+  
 });

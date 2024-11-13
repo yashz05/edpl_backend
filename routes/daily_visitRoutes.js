@@ -5,7 +5,10 @@ const daily_visitController = require('../controllers/daily_visitController.js')
 /*
  * GET
  */
-router.get('/', daily_visitController.list);
+router.get('/', daily_visitController.list);/*
+ * GET
+ */
+router.get('/all', daily_visitController.all);
 
 /*
  * GET

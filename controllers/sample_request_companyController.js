@@ -19,11 +19,11 @@ module.exports = {
    */
   show: async function (req, res) {
     const id = req.params.id;
-    console.log(id);
+    
     const sample_request_company = await Sample_request_companyModel.find({
       company_name: id,
     }).exec();
-    console.log(sample_request_company);
+    
     if (sample_request_company != null) {
       return res.json(sample_request_company);
     } else {
@@ -36,11 +36,11 @@ module.exports = {
    */
   single: async function (req, res) {
     const id = req.params.id;
-    console.log(id);
+    
     const sample_request_company = await Sample_request_companyModel.findOne({
       _id: id,
     }).exec();
-    console.log(sample_request_company);
+    
     if (sample_request_company != null) {
       return res.json(sample_request_company);
     } else {
@@ -84,7 +84,7 @@ module.exports = {
         req.body.sentsample !== undefined
           ? req.body.sentsample
           : sample_request_company.sentsample;
-          console.log(req.body.sentsample);
+          
 
       sample_request_company.type = req.body.type
         ? req.body.type
