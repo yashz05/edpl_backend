@@ -88,6 +88,7 @@ module.exports = {
       name: req.body.name,
       email: req.body.email,
       active: true,
+      branch: req.body.branch,
       uuid: Math.floor(Math.random() * 99999),
       password: myEncryptPassword,
       access: req.body.access,
@@ -118,6 +119,7 @@ module.exports = {
       // 
       sales_team.name = req.body.name ? req.body.name : sales_team.name;
       sales_team.email = req.body.email ? req.body.email : sales_team.email;
+      sales_team.branch = req.body.branch ? req.body.branch : sales_team.branch;
       sales_team.active = typeof req.body.active === 'boolean' ? req.body.active : sales_team.active;
 
       sales_team.uuid = req.body.uuid ? req.body.uuid : sales_team.uuid;

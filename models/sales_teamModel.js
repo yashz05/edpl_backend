@@ -8,6 +8,7 @@ const sales_teamSchema = new Schema(
     active: Boolean,
     uuid: { type: String, unique: true }, 
     password: String,
+    branch: String,
     access: {
       type: [String],
       default: ["sales"],
